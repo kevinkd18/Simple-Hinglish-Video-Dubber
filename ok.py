@@ -26,17 +26,8 @@ from flask import Flask, request, send_from_directory, abort
 from dotenv import load_dotenv
 from openai import OpenAI
 
-# MoviePy imports
-try:
-    from moviepy import VideoFileClip, AudioFileClip, CompositeAudioClip
-    print("Using MoviePy 2.x import structure")
-except ImportError:
-    try:
-        from moviepy.editor import VideoFileClip, AudioFileClip, CompositeAudioClip
-        print("Using MoviePy 1.x import structure")
-    except ImportError as e:
-        print(f"MoviePy import failed: {e}")
-        exit(1)
+# MoviePy import
+from moviepy import VideoFileClip, AudioFileClip, CompositeAudioClip
 
 # ── CONFIGURATION ────────────────────────────────────────────
 load_dotenv()
