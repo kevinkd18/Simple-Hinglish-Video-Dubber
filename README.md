@@ -171,120 +171,102 @@ pip list | grep -E "flask|whisper|edge-tts|openai|moviepy"
 http://localhost:7860
 ```
 
-## 🔄 Detailed Process Flow
+## 🔄 Complete Process Flow
 
-### 1. Video Processing Pipeline
 ```mermaid
 graph TD
-    A[Upload Video] --> B[Validate File Type]
-    B --> C[Generate Unique ID]
-    C --> D[Save to Upload Directory]
-    D --> E[Extract Audio Track]
-    E --> F[Convert to WAV Format]
-    F --> G[Audio Analysis]
+    %% Video Upload and Initial Processing
+    Upload[Upload Video] --> ValidateFile[Validate File Type]
+    ValidateFile --> GenerateID[Generate Unique ID]
+    GenerateID --> SaveFile[Save to Upload Directory]
     
-    subgraph Audio Analysis
-        G --> H[Sample Rate Check]
-        H --> I[Channel Processing]
-        I --> J[Audio Quality Validation]
-    end
-```
-
-### 2. Speech Recognition Flow
-```mermaid
-graph TD
-    A[WAV Audio Input] --> B[Load Whisper Model]
-    B --> C[Transcribe Audio]
+    %% Audio Extraction
+    SaveFile --> ExtractAudio[Extract Audio Track]
+    ExtractAudio --> ConvertWAV[Convert to WAV Format]
     
-    subgraph Transcription Process
-        C --> D[Word-level Timestamps]
-        D --> E[Segment Detection]
-        E --> F[Confidence Scoring]
-    end
-    
-    F --> G[Segment Validation]
-    G --> H[Split Long Segments]
-    H --> I[Final Transcript]
-```
-
-### 3. Gender Detection System
-```mermaid
-graph TD
-    A[Audio Segment] --> B[Load Audio Sample]
-    B --> C[Extract Features]
-    
-    subgraph Pitch Analysis
-        C --> D[PYIN Algorithm]
-        D --> E[Frequency Analysis]
-        E --> F[Statistical Processing]
-    end
-    
-    F --> G[Gender Classification]
-    G --> H[Voice Selection]
-```
-
-### 4. Translation Architecture
-```mermaid
-graph TD
-    A[English Text] --> B[Batch Processing]
-    B --> C[OpenRouter API]
-    
-    subgraph Translation Process
-        C --> D[DeepSeek Model]
-        D --> E[Context Analysis]
-        E --> F[Hinglish Generation]
-    end
-    
-    F --> G[Quality Check]
-    G --> H[Final Translation]
-```
-
-### 5. TTS Generation Pipeline
-```mermaid
-graph TD
-    A[Hinglish Text] --> B[Voice Selection]
-    B --> C[Edge TTS Setup]
-    
-    subgraph TTS Process
-        C --> D[Text Preprocessing]
-        D --> E[Speech Synthesis]
-        E --> F[Audio Post-processing]
-    end
-    
-    F --> G[Audio File Generation]
-    G --> H[Quality Validation]
-```
-
-### 6. Audio Processing Pipeline
-```mermaid
-graph TD
-    A[TTS Audio Files] --> B[Load Audio Segments]
-    B --> C[Duration Analysis]
-    
+    %% Audio Analysis
+    ConvertWAV --> AudioAnalysis[Audio Analysis]
     subgraph Audio Processing
-        C --> D[Time Stretching]
-        D --> E[Volume Normalization]
-        E --> F[Crossfade Application]
+        AudioAnalysis --> SampleRate[Sample Rate Check]
+        SampleRate --> ChannelProc[Channel Processing]
+        ChannelProc --> QualityValid[Audio Quality Validation]
     end
     
-    F --> G[Timeline Assembly]
-    G --> H[Final Mix]
-```
+    %% Speech Recognition
+    QualityValid --> LoadWhisper[Load Whisper Model]
+    LoadWhisper --> Transcribe[Transcribe Audio]
+    
+    subgraph Speech Recognition
+        Transcribe --> WordTimestamp[Word-level Timestamps]
+        WordTimestamp --> SegmentDetect[Segment Detection]
+        SegmentDetect --> ConfScore[Confidence Scoring]
+    end
+    
+    %% Gender Detection
+    ConfScore --> LoadSample[Load Audio Samples]
+    LoadSample --> ExtractFeatures[Extract Features]
+    
+    subgraph Voice Analysis
+        ExtractFeatures --> PitchAnalysis[PYIN Algorithm]
+        PitchAnalysis --> FreqAnalysis[Frequency Analysis]
+        FreqAnalysis --> StatProcess[Statistical Processing]
+        StatProcess --> GenderClass[Gender Classification]
+    end
+    
+    %% Translation Process
+    ConfScore --> BatchProc[Batch Processing]
+    BatchProc --> APICall[OpenRouter API Call]
+    
+    subgraph Translation
+        APICall --> DeepSeek[DeepSeek Model]
+        DeepSeek --> ContextAnalysis[Context Analysis]
+        ContextAnalysis --> HinglishGen[Hinglish Generation]
+        HinglishGen --> QualityCheck[Translation Quality Check]
+    end
+    
+    %% TTS Generation
+    GenderClass --> VoiceSelect[Voice Selection]
+    QualityCheck --> VoiceSelect
+    VoiceSelect --> TTSSetup[Edge TTS Setup]
+    
+    subgraph Text to Speech
+        TTSSetup --> TextPreProc[Text Preprocessing]
+        TextPreProc --> SpeechSynth[Speech Synthesis]
+        SpeechSynth --> AudioPostProc[Audio Post-processing]
+        AudioPostProc --> AudioFileGen[Audio File Generation]
+    end
+    
+    %% Final Audio Processing
+    AudioFileGen --> LoadSegments[Load Audio Segments]
+    LoadSegments --> DurationCheck[Duration Analysis]
+    
+    subgraph Audio Mixing
+        DurationCheck --> TimeStretch[Time Stretching]
+        TimeStretch --> VolNorm[Volume Normalization]
+        VolNorm --> Crossfade[Crossfade Application]
+        Crossfade --> Timeline[Timeline Assembly]
+    end
+    
+    %% Video Assembly
+    Timeline --> FinalMix[Final Audio Mix]
+    SaveFile --> LoadVideo[Load Video Stream]
+    LoadVideo --> RemoveAudio[Remove Original Audio]
+    FinalMix --> MergeAudio[Merge New Audio]
+    RemoveAudio --> MergeAudio
+    
+    %% Final Steps
+    MergeAudio --> VideoEncode[Video Encoding]
+    VideoEncode --> FinalExport[Final Export]
+    FinalExport --> Download[Download Result]
 
-### 7. Final Video Assembly
-```mermaid
-graph TD
-    A[Original Video] --> B[Load Video Stream]
-    B --> C[Extract Original Audio]
+    %% Styling
+    classDef process fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef subProcess fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    classDef result fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
     
-    subgraph Video Processing
-        C --> D[Remove Original Audio]
-        D --> E[Load New Audio Mix]
-        E --> F[Synchronization]
-    end
-    
-    F --> G[Video Encoding]
-    G --> H[Final Export]
+    class Upload,ValidateFile,GenerateID,SaveFile process
+    class AudioAnalysis,LoadWhisper,Transcribe,LoadSample,BatchProc,VoiceSelect,LoadSegments process
+    class FinalMix,VideoEncode,FinalExport,Download result
 ```
 
 ## 🛠️ Technical Architecture Deep Dive
