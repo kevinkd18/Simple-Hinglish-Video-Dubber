@@ -1,0 +1,13 @@
+flask>=2.0.0
+python-dotenv>=0.19.0
+requests>=2.26.0
+numpy>=1.19.5
+openai>=1.0.0
+openai-whisper>=20231117
+edge-tts>=6.1.9
+moviepy>=1.0.3
+librosa>=0.10.1
+soundfile>=0.12.1
+imageio-ffmpeg>=0.4.7
+torchaudio>=2.0.0
+python-multipart>=0.0.6
